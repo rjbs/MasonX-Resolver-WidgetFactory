@@ -3,7 +3,7 @@ use warnings;
 
 package MasonX::Resolver::WidgetFactory;
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 use Moose;
 BEGIN { extends 'HTML::Mason::Resolver' }
@@ -93,7 +93,7 @@ MasonX::Resolver::WidgetFactory - resolve paths to HTML::Widget::Factory plugins
 
 =head1 VERSION
 
-Version 0.001
+Version 0.002
 
 =head1 SYNOPSIS
 
