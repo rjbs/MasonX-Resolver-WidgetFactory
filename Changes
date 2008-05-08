@@ -1,5 +1,9 @@
 Revision history for MasonX-Resolver-WidgetFactory
 
+0.004   Thu May  8 17:03:46 EDT 2008
+
+        add -content handling for <&| syntax
+
 0.003   Thu May  8 16:24:21 EDT 2008
 
         allow falling back to other resolvers for widgets we don't provide       

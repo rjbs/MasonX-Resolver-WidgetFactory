@@ -3,7 +3,7 @@ use warnings;
 
 package MasonX::Resolver::WidgetFactory;
 
-our $VERSION = '0.003';
+our $VERSION = '0.004';
 
 use Moose;
 BEGIN { extends 'HTML::Mason::Resolver' }
@@ -79,6 +79,12 @@ sub glob_path {
   return; # meaningless
 }
 
+my %content_default = (
+  link     => 'html',
+  button   => 'html',
+  textarea => 'value',
+);
+
 sub generate_source {
   my ($self, $widget) = @_;
   return $self->source_cache->{$widget} ||= do {
@@ -86,7 +92,24 @@ sub generate_source {
     my $factory = $self->factory;
     my $fac_class = ref $factory;
     { no strict 'refs'; ${ $fac_class . '::factory' } = $factory; }
-    sprintf '<%% $%s::factory->%s(\%%ARGS) %%>', $fac_class, $widget;
+    return sprintf <<'END',
+<%%init>
+my $content_param = $ARGS{'-content'} || '%s';
+if ($m->has_content) {
+  die "content passed to widget '%s', but no -content argument given "
+    . "and no default content argument exists"
+    unless $content_param;
+  die "component-with-content call for widget '%s' has content bound "
+    . "to '$content_param' but also includes an argument with that name"
+    if exists $ARGS{$content_param};
+  $ARGS{$content_param} = $m->content;
+  } # stupid vim syntax highlighting gets this wrong if in column 0
+</%%init>
+<%% $%s::factory->%s(\%%ARGS) %%>
+END
+      $content_default{$widget} || '',
+      $widget, $widget,
+      $fac_class, $widget;
   };
 }
 
@@ -102,7 +125,7 @@ MasonX::Resolver::WidgetFactory - resolve paths to HTML::Widget::Factory plugins
 
 =head1 VERSION
 
-Version 0.003
+Version 0.004
 
 =head1 SYNOPSIS
 
@@ -134,6 +157,14 @@ For example:
   <& /widget/select, name => "myselect", options => \@options &>
 
 The component call to C</widget/select> is translated to C<< $factory->select(...arguments...) >>.
+
+Among other things, this means that you can use component-with-content calls,
+which may be easier in some situations:
+
+  <&| /widget/button &>
+  This is normal mason content, including <% $various_interpolations %>
+  and other <& /component/calls &>
+  </&>
 
 =head2 prefix
 

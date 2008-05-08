@@ -66,5 +66,39 @@ sub make_tests {
     expect_error => qr/factory does not provide/,
   );
 
+  $group->add_test(
+    name => 'content_default',
+    description => 'cwc -- default param',
+    interp_params => $ip->(),
+    component => <<'',
+<&| /w/link, href => 'http://test.com' &><span>My Link</span></&>
+
+    expect => <<'',
+<a href="http://test.com"><span>My Link</span></a>
+
+  );
+
+  $group->add_test(
+    name => 'content_explicit',
+    description => 'cwc -- explicit param',
+    interp_params => $ip->(),
+    component => <<'',
+<&| /w/link, href => 'http://test.com', -content => 'text' &>"Hello"</&>
+
+    expect => <<'',
+<a href="http://test.com">&#34;Hello&#34;</a>
+
+  );
+
+  $group->add_test(
+    name => 'content_missing',
+    description => 'cwc -- no param',
+    interp_params => $ip->(),
+    component => <<'',
+<&| /w/input, name => "test" &>Test value</&>
+
+    expect_error => qr/no -content argument given/,
+  );
+
   return $group;
 }
