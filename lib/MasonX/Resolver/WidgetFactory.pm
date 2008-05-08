@@ -3,7 +3,7 @@ use warnings;
 
 package MasonX::Resolver::WidgetFactory;
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 use Moose;
 BEGIN { extends 'HTML::Mason::Resolver' }
@@ -17,6 +17,7 @@ sub validation_spec {
   return {
     %{ $self->SUPER::validation_spec || {} },
     prefix  => 1,
+    strict  => { optional => 1 },
     factory => { optional => 1 },
   },
 }
@@ -32,6 +33,12 @@ has prefix => (
   is => 'rw',
   isa => 'Str',
   required => 1,
+);
+
+has strict => (
+  is => 'rw',
+  isa => 'Bool',
+  default => 0,
 );
 
 has source_cache => (
@@ -52,8 +59,10 @@ sub get_info {
 
   my ($widget) = $self->_matches($path) or return;
   
-  die "factory does not provide '$widget' ($path)"
-    unless $self->factory->provides_widget($widget);
+  unless ($self->factory->provides_widget($widget)) {
+    die "factory does not provide '$widget' ($path)" if $self->strict;
+    return;
+  }
 
   return HTML::Mason::ComponentSource->new(
     friendly_name   => "$widget widget",
@@ -93,7 +102,7 @@ MasonX::Resolver::WidgetFactory - resolve paths to HTML::Widget::Factory plugins
 
 =head1 VERSION
 
-Version 0.002
+Version 0.003
 
 =head1 SYNOPSIS
 
@@ -134,6 +143,12 @@ The component path root under which to respond.
 
 The HTML::Widget::Factory object to use.  Defaults to a new
 HTML::Widget::Factory object.
+
+=head2 strict
+
+Boolean.  If false (the default), the resolver will return false when asked to
+resolve a path that does not correspond to a widget provided by the factory.
+If true, it will die instead.
 
 =head1 AUTHOR
 

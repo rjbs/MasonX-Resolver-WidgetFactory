@@ -20,21 +20,24 @@ sub make_tests {
     description => "WidgetFactory resolver tests",
   );
 
-  my %ip = (
-    resolver => MasonX::Resolver::Multiplex->new(
-      resolvers => [
-        MasonX::Resolver::WidgetFactory->new(
-          prefix => '/w',
-        ),
-        HTML::Mason::Resolver::File->new,
-      ],
-    )
-  );
+  my $ip = sub {
+    return {
+      resolver => MasonX::Resolver::Multiplex->new(
+        resolvers => [
+          MasonX::Resolver::WidgetFactory->new(
+            prefix => '/w',
+            @_,
+          ),
+          HTML::Mason::Resolver::File->new,
+        ],
+      )
+    };
+  };
 
   $group->add_test(
     name => 'basic',
     description => 'basic functionality test',
-    interp_params => \%ip,
+    interp_params => $ip->(),
     component => <<'',
 <& /w/input, id => "test" &>
 
@@ -46,11 +49,21 @@ sub make_tests {
   $group->add_test(
     name => 'missing',
     description => 'request for missing widget',
-    interp_params => \%ip,
+    interp_params => $ip->(),
     component => <<'',
 <& /w/no_such &>,
 
-    expect_error => qr/factory does not provide 'no_such'/,
+    expect_error => qr/could not find component for path/,
+  );
+
+  $group->add_test(
+    name => 'missing',
+    description => 'request for missing widget',
+    interp_params => $ip->(strict => 1),
+    component => <<'',
+<& /w/no_such &>,
+
+    expect_error => qr/factory does not provide/,
   );
 
   return $group;

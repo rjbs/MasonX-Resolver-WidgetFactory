@@ -1,7 +1,14 @@
 Revision history for MasonX-Resolver-WidgetFactory
 
-0.001   2008-05-07 16:49:20
-        First version, released on an unsuspecting world.
+0.003   Thu May  8 16:24:21 EDT 2008
+
+        allow falling back to other resolvers for widgets we don't provide       
 
 0.002   2008-05-07 16:50:33
+
         include Multiplex in build_requires
+
+0.001   2008-05-07 16:49:20
+
+        First version, released on an unsuspecting world.
+
