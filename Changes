@@ -1,5 +1,13 @@
 Revision history for MasonX-Resolver-WidgetFactory
 
+0.006
+
+        try harder (same as 0.005)
+
+0.005   Thu Jul 10 15:55:55 EDT 2008
+
+        try to avoid factory objects going away
+
 0.004   Thu May  8 17:03:46 EDT 2008
 
         add -content handling for <&| syntax

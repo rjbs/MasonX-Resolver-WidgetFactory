@@ -3,7 +3,7 @@ use warnings;
 
 package MasonX::Resolver::WidgetFactory;
 
-our $VERSION = '0.005';
+our $VERSION = '0.006';
 
 use Moose;
 BEGIN { extends 'HTML::Mason::Resolver' }
@@ -50,6 +50,24 @@ has source_cache => (
   default => sub { {} },
 );
 
+sub _stupid_global {
+  my ($self) = @_;
+  return ref($self) . '::factory_' . _signature($self->factory);
+}
+
+sub new {
+  my $class = shift;
+  my $self = $class->SUPER::new(@_);
+  # this is terrible, but I can't see a better way to share the factory
+  my $stupid_global = $self->_stupid_global;
+  my $factory = $self->factory;
+  { 
+    no strict 'refs';
+    defined &{$stupid_global} or *{$stupid_global} = sub () { $factory };
+  }
+  return $self;
+}
+
 sub _matches {
   my ($self, $path) = @_;
   my $prefix = $self->prefix;
@@ -95,10 +113,6 @@ sub _signature {
 sub generate_source {
   my ($self, $widget) = @_;
   return $self->source_cache->{$widget} ||= do {
-    # this is terrible, but I can't see a better way to share the factory
-    my $factory = $self->factory;
-    my $stupid_global = ref($self) . '::factory_' . _signature($factory);
-    { no strict 'refs'; ${ $stupid_global } = $factory; }
     return sprintf <<'END',
 <%%init>
 my $content_param = $ARGS{'-content'} || '%s';
@@ -112,11 +126,11 @@ if ($m->has_content) {
   $ARGS{$content_param} = $m->content;
   } # stupid vim syntax highlighting gets this wrong if in column 0
 </%%init>
-<%% $%s->%s(\%%ARGS) %%>
+<%% %s->%s(\%%ARGS) %%>
 END
       $content_default{$widget} || '',
       $widget, $widget,
-      $stupid_global, $widget;
+      $self->_stupid_global, $widget;
   };
 }
 
@@ -132,7 +146,7 @@ MasonX::Resolver::WidgetFactory - resolve paths to HTML::Widget::Factory plugins
 
 =head1 VERSION
 
-Version 0.005
+Version 0.006
 
 =head1 SYNOPSIS
 

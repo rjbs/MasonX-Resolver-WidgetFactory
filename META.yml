@@ -20,5 +20,6 @@ requires:
   HTML::Mason: 1.30
   HTML::Widget::Factory: 0.067
   Moose: 0
-version: 0.005
+version: 0.006
+
 
