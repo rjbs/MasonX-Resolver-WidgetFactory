@@ -3,7 +3,7 @@ use warnings;
 
 package MasonX::Resolver::WidgetFactory;
 
-our $VERSION = '0.004';
+our $VERSION = '0.005';
 
 use Moose;
 BEGIN { extends 'HTML::Mason::Resolver' }
@@ -11,6 +11,8 @@ BEGIN { extends 'HTML::Mason::Resolver' }
 use HTML::Widget::Factory;
 use HTML::Mason::Tools qw(paths_eq);
 use File::Spec;
+use Storable qw(nfreeze);
+use Digest::MD5 qw(md5_hex);
 
 sub validation_spec {
   my $self = shift;
@@ -85,13 +87,18 @@ my %content_default = (
   textarea => 'value',
 );
 
+sub _signature {
+  my ($factory) = @_;
+  return md5_hex(nfreeze($factory));
+}
+
 sub generate_source {
   my ($self, $widget) = @_;
   return $self->source_cache->{$widget} ||= do {
     # this is terrible, but I can't see a better way to share the factory
     my $factory = $self->factory;
-    my $fac_class = ref $factory;
-    { no strict 'refs'; ${ $fac_class . '::factory' } = $factory; }
+    my $stupid_global = ref($self) . '::factory_' . _signature($factory);
+    { no strict 'refs'; ${ $stupid_global } = $factory; }
     return sprintf <<'END',
 <%%init>
 my $content_param = $ARGS{'-content'} || '%s';
@@ -105,11 +112,11 @@ if ($m->has_content) {
   $ARGS{$content_param} = $m->content;
   } # stupid vim syntax highlighting gets this wrong if in column 0
 </%%init>
-<%% $%s::factory->%s(\%%ARGS) %%>
+<%% $%s->%s(\%%ARGS) %%>
 END
       $content_default{$widget} || '',
       $widget, $widget,
-      $fac_class, $widget;
+      $stupid_global, $widget;
   };
 }
 
@@ -125,7 +132,7 @@ MasonX::Resolver::WidgetFactory - resolve paths to HTML::Widget::Factory plugins
 
 =head1 VERSION
 
-Version 0.004
+Version 0.005
 
 =head1 SYNOPSIS
 
