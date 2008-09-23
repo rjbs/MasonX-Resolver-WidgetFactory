@@ -1,25 +1,25 @@
---- 
-abstract: resolve paths to HTML::Widget::Factory plugins
-author: 
-  - Hans Dieter Pearcey <hdp@pobox.com>
-build_requires: 
+---
+abstract: 'resolve paths to HTML::Widget::Factory plugins'
+author:
+  - 'Hans Dieter Pearcey <hdp@pobox.com>'
+build_requires:
   MasonX::Resolver::Multiplex: 0
   Test::More: 0
 distribution_type: module
-generated_by: Module::Install version 0.68
+generated_by: 'Module::Install version 0.77'
 license: perl
-meta-spec: 
-  url: http://module-build.sourceforge.net/META-spec-v1.3.html
-  version: 1.3
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
 name: MasonX-Resolver-WidgetFactory
-no_index: 
-  directory: 
+no_index:
+  directory:
     - inc
     - t
-requires: 
+requires:
   HTML::Mason: 1.30
   HTML::Widget::Factory: 0.067
   Moose: 0
-version: 0.006
-
-
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.007

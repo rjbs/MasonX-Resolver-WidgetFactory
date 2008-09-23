@@ -3,7 +3,7 @@ use warnings;
 
 package MasonX::Resolver::WidgetFactory;
 
-our $VERSION = '0.006';
+our $VERSION = '0.007';
 
 use Moose;
 BEGIN { extends 'HTML::Mason::Resolver' }
@@ -112,8 +112,11 @@ sub _signature {
 
 sub generate_source {
   my ($self, $widget) = @_;
-  return $self->source_cache->{$widget} ||= do {
-    return sprintf <<'END',
+
+  return $self->source_cache->{$widget} if $self->source_cache->{$widget};
+
+  $self->source_cache->{$widget} = do {
+    sprintf <<'END',
 <%%init>
 my $content_param = $ARGS{'-content'} || '%s';
 if ($m->has_content) {
@@ -132,6 +135,9 @@ END
       $widget, $widget,
       $self->_stupid_global, $widget;
   };
+
+  chomp $self->source_cache->{$widget};
+  return $self->source_cache->{$widget};
 }
 
 # we don't need apache_request_to_comp_path if we're being used with
@@ -146,7 +152,7 @@ MasonX::Resolver::WidgetFactory - resolve paths to HTML::Widget::Factory plugins
 
 =head1 VERSION
 
-Version 0.006
+Version 0.007
 
 =head1 SYNOPSIS
 
