@@ -86,7 +86,7 @@ sub make_tests {
 <&| /w/link, href => 'http://test.com', -content => 'text' &>"Hello"</&>
 
     expect => <<'',
-<a href="http://test.com">&#34;Hello&#34;</a>
+<a href="http://test.com">&quot;Hello&quot;</a>
 
   );
 
